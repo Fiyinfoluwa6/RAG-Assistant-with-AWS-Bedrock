@@ -1,35 +1,39 @@
 import os
 import logging
 from dotenv import load_dotenv
-from langchain_community.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Milvus
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from bedrock_embeddings import BedrockNovaEmbeddings
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-open_api_key = os.environ.get("OPENAI_API_KEY")
-milvus_alias = os.environ.get("MILVUS_ALIAS")
-milvus_host = os.environ.get("MILVUS_HOST")
-milvus_port = os.environ.get("MILVUS_PORT")
-milvus_collection_name = os.getenv("MILVUS_VECTOR_COLLECTION_NAME")
+aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
+aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+aws_region = os.environ.get("AWS_REGION", "us-east-1")
+faiss_index_path = os.path.abspath(os.environ.get("FAISS_INDEX_PATH", "../faiss_index"))
 
-# Validate environment variables
-if not all(
-    [open_api_key, milvus_alias, milvus_host, milvus_port, milvus_collection_name]
-):
-    logger.error("Missing required environment variables.")
+if not all([aws_access_key_id, aws_secret_access_key]):
+    logger.error("Missing required environment variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
     exit(1)
 
 
 def load_docs(directory_path):
     try:
-        loader = DirectoryLoader(directory_path)
-        documents = loader.load()
+        documents = []
+
+        # Load .txt files
+        txt_loader = DirectoryLoader(directory_path, glob="**/*.txt", loader_cls=TextLoader)
+        documents.extend(txt_loader.load())
+
+        # Load .pdf files
+        pdf_loader = DirectoryLoader(directory_path, glob="**/*.pdf", loader_cls=PyPDFLoader)
+        documents.extend(pdf_loader.load())
+
+        logger.info(f"Loaded {len(documents)} documents from {directory_path}")
         return documents
     except Exception as e:
         logger.error(f"Failed to load documents: {e}")
@@ -38,29 +42,27 @@ def load_docs(directory_path):
 
 def split_docs(documents, chunk_size=500, chunk_overlap=20):
     try:
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-        docs = text_splitter.split_documents(documents)
+        splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        docs = splitter.split_documents(documents)
+        logger.info(f"Split into {len(docs)} chunks")
         return docs
     except Exception as e:
         logger.error(f"Failed to split documents: {e}")
         return []
 
 
-def store_embeddings_in_milvus(docs):
+def store_embeddings(docs):
     try:
-        openai_embedding_model = OpenAIEmbeddings(openai_api_key=open_api_key)
-        milvus_db = Milvus.from_documents(
-            documents=[],
-            embedding=openai_embedding_model,
-            connection_args={"host": milvus_host, "port": milvus_port},
-            collection_name=milvus_collection_name,
-            search_params={"metric": "IP", "offset": 0},
+        embedding_model = BedrockNovaEmbeddings(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region,
         )
-        milvus_db.add_documents(documents=docs)
+        db = FAISS.from_documents(docs, embedding_model)
+        db.save_local(faiss_index_path)
+        logger.info(f"Saved FAISS index to {faiss_index_path}")
     except Exception as e:
-        logger.error(f"Failed to store embeddings in Pinecone: {e}")
+        logger.error(f"Failed to store embeddings: {e}")
 
 
 def main():
@@ -70,9 +72,9 @@ def main():
         exit(1)
     docs = split_docs(documents)
     if not docs:
-        logger.error("No documents split.")
+        logger.error("No document chunks created.")
         exit(1)
-    store_embeddings_in_milvus(docs)
+    store_embeddings(docs)
 
 
 if __name__ == "__main__":

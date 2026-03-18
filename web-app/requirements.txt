@@ -1,9 +1,8 @@
 python-dotenv
 Flask
-pymilvus
-openai 
-tiktoken 
-langchain
-langchain_openai
-langchain-community 
+boto3
+faiss-cpu
+langchain-aws
 langchain-core
+langchain-community
+langchain-text-splitters

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milvus-OpenAI RAG System Workflow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .workflow-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .workflow-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .flow-step {
+            display: inline-block;
+            padding: 15px 20px;
+            margin: 10px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+            position: relative;
+        }
+        .start { background: #4CAF50; }
+        .process { background: #2196F3; }
+        .decision { background: #FF9800; border-radius: 50px; }
+        .error { background: #F44336; }
+        .success { background: #8BC34A; }
+        .arrow {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 20px;
+            color: #666;
+        }
+        .workflow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+        }
+        .section-title {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 20px 0 10px 0;
+            text-align: center;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="workflow-container">
+        <h1 class="workflow-title">Milvus-OpenAI RAG System Complete Workflow</h1>
+        
+        <div class="section-title">Document Ingestion Pipeline</div>
+        <div class="workflow-row">
+            <div class="flow-step start">Start Ingestion</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Load Config</div>
+            <span class="arrow">→</span>
+            <div class="flow-step decision">Config Valid?</div>
+        </div>
+        
+        <div class="workflow-row">
+            <div class="branch">
+                <div class="flow-step error">Exit with Error</div>
+                <span style="margin-top: 10px;">↑ No</span>
+            </div>
+            <div class="branch">
+                <span style="margin-bottom: 10px;">Yes ↓</span>
+                <div class="flow-step process">Load Documents</div>
+            </div>
+        </div>
+        
+        <div class="workflow-row">
+            <div class="flow-step process">Split into Chunks</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Generate Embeddings</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Store in Milvus</div>
+            <span class="arrow">→</span>
+            <div class="flow-step success">Complete</div>
+        </div>
+        
+        <div class="section-title">User Query Processing</div>
+        <div class="workflow-row">
+            <div class="flow-step start">User Question</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Validate Input</div>
+            <span class="arrow">→</span>
+            <div class="flow-step decision">Special Command?</div>
+        </div>
+        
+        <div class="workflow-row">
+            <div class="branch">
+                <div class="flow-step success">Thank You Response</div>
+                <span style="margin-top: 10px;">↑ Yes</span>
+            </div>
+            <div class="branch">
+                <span style="margin-bottom: 10px;">No ↓</span>
+                <div class="flow-step process">Load Memory</div>
+            </div>
+        </div>
+        
+        <div class="workflow-row">
+            <div class="flow-step process">Query Milvus</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Retrieve Top 5</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Generate Response</div>
+            <span class="arrow">→</span>
+            <div class="flow-step success">Return Answer</div>
+        </div>
+        
+        <div class="section-title">System Architecture Overview</div>
+        <div class="workflow-row">
+            <div class="branch">
+                <div class="flow-step process">Ingestion Service</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">Document Processing</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">Milvus Storage</div>
+            </div>
+            
+            <div class="branch">
+                <div class="flow-step process">Web Application</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">Flask API</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">Chat Interface</div>
+            </div>
+            
+            <div class="branch">
+                <div class="flow-step process">External Services</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">OpenAI API</div>
+                <div style="margin: 10px 0;">↓</div>
+                <div class="flow-step process">Milvus Database</div>
+            </div>
+        </div>
+        
+        <div class="section-title">Data Flow</div>
+        <div class="workflow-row">
+            <div class="flow-step start">Text Documents</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Chunks</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Embeddings</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Vector DB</div>
+            <span class="arrow">→</span>
+            <div class="flow-step process">Similarity Search</div>
+            <span class="arrow">→</span>
+            <div class="flow-step success">AI Response</div>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
+            <h3 style="color: #1976d2; margin-top: 0;">Legend:</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div><span class="flow-step start" style="display: inline-block; padding: 5px 10px; font-size: 12px;">Start/Input</span></div>
+                <div><span class="flow-step process" style="display: inline-block; padding: 5px 10px; font-size: 12px;">Process</span></div>
+                <div><span class="flow-step decision" style="display: inline-block; padding: 5px 10px; font-size: 12px;">Decision</span></div>
+                <div><span class="flow-step success" style="display: inline-block; padding: 5px 10px; font-size: 12px;">Success</span></div>
+                <div><span class="flow-step error" style="display: inline-block; padding: 5px 10px; font-size: 12px;">Error</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

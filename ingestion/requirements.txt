@@ -1,9 +1,12 @@
 python-dotenv
 pymilvus
-openai 
-tiktoken 
+milvus-lite
+langchain-milvus
+boto3
+tiktoken
 langchain
-langchain_openai
-langchain-community 
+langchain-openai
+langchain-community
 langchain-core
-unstructured
+langchain-text-splitters
+pypdf
